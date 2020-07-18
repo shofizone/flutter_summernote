@@ -25,11 +25,13 @@ class FlutterSummernote extends StatefulWidget {
   final String widthImage;
   final String hint;
   final String customToolbar;
-  final showBottomBar;
+  final bool showBottomBar;
+  final bool showPickFileOnBottomBar;
 
   FlutterSummernote(
       {Key key,
       this.showBottomBar =true,
+      this.showPickFileOnBottomBar =true,
       this.value,
       this.height,
       this.decoration,
@@ -124,6 +126,7 @@ class FlutterSummernoteState extends State<FlutterSummernote> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(children: <Widget>[
+                if(widget.showPickFileOnBottomBar)
                 Expanded(
                   child: GestureDetector(
                     onTap: () => _attach(context),
