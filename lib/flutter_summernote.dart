@@ -25,16 +25,18 @@ class FlutterSummernote extends StatefulWidget {
   final String widthImage;
   final String hint;
   final String customToolbar;
+  final showBottomBar;
 
-  FlutterSummernote({
-    Key key,
-    this.value,
-    this.height,
-    this.decoration,
-    this.widthImage:"100%",
-    this.hint,
-    this.customToolbar
-  }): super(key: key);
+  FlutterSummernote(
+      {Key key,
+      this.showBottomBar =true,
+      this.value,
+      this.height,
+      this.decoration,
+      this.widthImage: "100%",
+      this.hint,
+      this.customToolbar})
+      : super(key: key);
 
   @override
   FlutterSummernoteState createState() => FlutterSummernoteState();
@@ -77,28 +79,29 @@ class FlutterSummernoteState extends State<FlutterSummernote> {
     return Container(
       height: widget.height ?? MediaQuery.of(context).size.height,
       decoration: widget.decoration ??
-        BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(4)),
-          border: Border.all(color: Color(0xffececec), width: 1),
-        ),
+          BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(4)),
+            border: Border.all(color: Color(0xffececec), width: 1),
+          ),
       child: Column(
         children: <Widget>[
           Expanded(
             child: WebView(
-              key: _mapKey, 
+              key: _mapKey,
               onWebResourceError: (e) {
                 print("error ${e.description}");
               },
               onWebViewCreated: (webViewController) {
                 _controller = webViewController;
-                final String contentBase64 = base64Encode(const Utf8Encoder().convert(_page));
+                final String contentBase64 =
+                    base64Encode(const Utf8Encoder().convert(_page));
                 _controller.loadUrl('data:text/html;base64,$contentBase64');
               },
               javascriptMode: JavascriptMode.unrestricted,
               gestureNavigationEnabled: true,
               gestureRecognizers: [
                 Factory(
-                        () => VerticalDragGestureRecognizer()..onUpdate = (_) {}),
+                    () => VerticalDragGestureRecognizer()..onUpdate = (_) {}),
               ].toSet(),
               javascriptChannels: <JavascriptChannel>[
                 getTextJavascriptChannel(context)
@@ -117,57 +120,58 @@ class FlutterSummernoteState extends State<FlutterSummernote> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(children: <Widget>[
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => _attach(context),
-                  child: Row(children: <Widget>[
-                    Icon(Icons.attach_file),
-                    Text("Attachments")
-                  ], mainAxisAlignment: MainAxisAlignment.center),
+          if (widget.showBottomBar)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(children: <Widget>[
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _attach(context),
+                    child: Row(children: <Widget>[
+                      Icon(Icons.attach_file),
+                      Text("Attachments")
+                    ], mainAxisAlignment: MainAxisAlignment.center),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    String data = await getText();
-                    Clipboard.setData(new ClipboardData(text: data));
-                  },
-                  child: Row(children: <Widget>[
-                    Icon(Icons.content_copy),
-                    Text("Copy")
-                  ], mainAxisAlignment: MainAxisAlignment.center),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      String data = await getText();
+                      Clipboard.setData(new ClipboardData(text: data));
+                    },
+                    child: Row(children: <Widget>[
+                      Icon(Icons.content_copy),
+                      Text("Copy")
+                    ], mainAxisAlignment: MainAxisAlignment.center),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    ClipboardData data =
-                      await Clipboard.getData(Clipboard.kTextPlain);
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      ClipboardData data =
+                          await Clipboard.getData(Clipboard.kTextPlain);
 
-                    String txtIsi = data.text
-                        .replaceAll("'", '\\"')
-                        .replaceAll('"', '\\"')
-                        .replaceAll("[", "\\[")
-                        .replaceAll("]", "\\]")
-                        .replaceAll("\n", "<br/>")
-                        .replaceAll("\n\n", "<br/>")
-                        .replaceAll("\r", " ")
-                        .replaceAll('\r\n', " ");
-                    String txt =
-                        "\$('.note-editable').append( '" + txtIsi + "');";
-                    _controller.evaluateJavascript(txt);
-                  },
-                  child: Row(children: <Widget>[
-                    Icon(Icons.content_paste),
-                    Text("Paste")
-                  ], mainAxisAlignment: MainAxisAlignment.center),
-                ),
-              )
-            ]),
-          )
+                      String txtIsi = data.text
+                          .replaceAll("'", '\\"')
+                          .replaceAll('"', '\\"')
+                          .replaceAll("[", "\\[")
+                          .replaceAll("]", "\\]")
+                          .replaceAll("\n", "<br/>")
+                          .replaceAll("\n\n", "<br/>")
+                          .replaceAll("\r", " ")
+                          .replaceAll('\r\n', " ");
+                      String txt =
+                          "\$('.note-editable').append( '" + txtIsi + "');";
+                      _controller.evaluateJavascript(txt);
+                    },
+                    child: Row(children: <Widget>[
+                      Icon(Icons.content_paste),
+                      Text("Paste")
+                    ], mainAxisAlignment: MainAxisAlignment.center),
+                  ),
+                )
+              ]),
+            )
         ],
       ),
     );
@@ -246,9 +250,9 @@ class FlutterSummernoteState extends State<FlutterSummernote> {
             child: Text(
               title,
               style: TextStyle(
-                color: Colors.black54,
-                fontSize: 16,
-                fontWeight: FontWeight.w400),
+                  color: Colors.black54,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400),
             ),
           )
         ],
@@ -256,12 +260,11 @@ class FlutterSummernoteState extends State<FlutterSummernote> {
     );
   }
 
-  String _initPage(String customToolbar){
+  String _initPage(String customToolbar) {
     String toolbar;
-    if(customToolbar == null){
+    if (customToolbar == null) {
       toolbar = _defaultToolbar;
-    }
-    else {
+    } else {
       toolbar = customToolbar;
     }
 
@@ -307,55 +310,53 @@ class FlutterSummernoteState extends State<FlutterSummernote> {
     ]
   """;
 
-  void _attach(BuildContext context){
+  void _attach(BuildContext context) {
     showModalBottomSheet(
-      context: context, 
-      builder: (context){
-        return Column(children: <Widget>[
-          ListTile(
-            leading: Icon(Icons.camera_alt),
-            title: Text("Camera"),
-            subtitle: Text("Attach image from camera"),
-            onTap: () async {
-              Navigator.pop(context);
-              final image = await _getImage(true);
-              if(image != null) _addImage(image);
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.photo),
-            title: Text("Gallery"),
-            subtitle: Text("Attach image from gallery"),
-            onTap: () async {
-              Navigator.pop(context);
-              final image = await _getImage(false);
-              if(image != null) _addImage(image);
-            },
-          ),
-        ], mainAxisSize: MainAxisSize.min);
-      }
-    );
+        context: context,
+        builder: (context) {
+          return Column(children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.camera_alt),
+              title: Text("Camera"),
+              subtitle: Text("Attach image from camera"),
+              onTap: () async {
+                Navigator.pop(context);
+                final image = await _getImage(true);
+                if (image != null) _addImage(image);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.photo),
+              title: Text("Gallery"),
+              subtitle: Text("Attach image from gallery"),
+              onTap: () async {
+                Navigator.pop(context);
+                final image = await _getImage(false);
+                if (image != null) _addImage(image);
+              },
+            ),
+          ], mainAxisSize: MainAxisSize.min);
+        });
   }
 
   Future<File> _getImage(bool fromCamera) async {
-    final picked = await _imagePicker.getImage(source: (fromCamera) ? ImageSource.camera : ImageSource.gallery);
-    if(picked != null){
+    final picked = await _imagePicker.getImage(
+        source: (fromCamera) ? ImageSource.camera : ImageSource.gallery);
+    if (picked != null) {
       return File(picked.path);
-    }
-    else {
+    } else {
       return null;
     }
   }
 
-  void _addImage(File image) async{
+  void _addImage(File image) async {
     String filename = basename(image.path);
     List<int> imageBytes = await image.readAsBytes();
     String base64Image =
         "<img width=\"${widget.widthImage}\" src=\"data:image/png;base64, "
         "${base64Encode(imageBytes)}\" data-filename=\"$filename\">";
 
-    String txt =
-        "\$('.note-editable').append( '" + base64Image + "');";
+    String txt = "\$('.note-editable').append( '" + base64Image + "');";
     _controller.evaluateJavascript(txt);
   }
 }
